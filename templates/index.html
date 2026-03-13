@@ -1,0 +1,130 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Email Spam Detector</title>
+
+    <style>
+      body {
+        margin: 0;
+        font-family: Arial, Helvetica, sans-serif;
+        background-image: url("https://images.unsplash.com/photo-1557682250-33bd709cbe85");
+        background-size: cover;
+        background-position: center;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: white;
+      }
+
+      .container {
+        text-align: center;
+        width: 650px;
+      }
+
+      h1 {
+        font-size: 60px;
+        margin-bottom: 10px;
+      }
+
+      p {
+        font-size: 18px;
+        color: #f0f0f0;
+        margin-bottom: 40px;
+      }
+
+      textarea {
+        width: 100%;
+        height: 80px;
+        border-radius: 40px;
+        border: none;
+        padding: 20px;
+        font-size: 16px;
+        outline: none;
+        resize: none;
+      }
+
+      button {
+        margin-top: 20px;
+        background: #f2b544;
+        border: none;
+        padding: 15px 40px;
+        font-size: 18px;
+        border-radius: 40px;
+        cursor: pointer;
+        font-weight: bold;
+      }
+
+      button:hover {
+        background: #e5a431;
+      }
+
+      .result {
+        margin-top: 25px;
+        font-size: 30px;
+        font-weight: bold;
+      }
+
+      .spam {
+        color: #ff4c4c;
+      }
+
+      .ham {
+        color: #5cff6f;
+      }
+
+      .probability {
+        margin-top: 10px;
+        font-size: 18px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="container">
+      <h1>Spam Detection</h1>
+
+      <p>
+        This web application uses a machine learning model to analyze email text
+        and determine whether the message is spam or legitimate. Paste the email
+        content below and click Detect Spam.
+      </p>
+
+      <form method="POST" onsubmit="return validateForm();">
+        <textarea
+          id="emailText"
+          name="email"
+          placeholder="Paste email text here..."
+          required
+        ></textarea>
+
+        <br />
+
+        <button type="submit">DETECT SPAM</button>
+      </form>
+
+      {% if result %}
+
+      <div class="result {% if result == 'SPAM' %}spam{% else %}ham{% endif %}">
+        {{result}}
+      </div>
+
+      <div class="probability">Likely to be spam: {{probability}}</div>
+
+      {% endif %}
+    </div>
+
+    <script>
+      function validateForm() {
+        let text = document.getElementById("emailText").value.trim();
+
+        if (text === "") {
+          alert("Please paste the email text before detecting spam.");
+          return false;
+        }
+
+        return true;
+      }
+    </script>
+  </body>
+</html>
