@@ -221,24 +221,28 @@ Subject: Congratulations! You have won a free iPhone
 
 Congratulations! You have been selected as the lucky winner of a brand new iPhone.
 Click here now to claim your prize before the offer expires.
+
 2
 Subject: Limited Time Offer
 
 Earn money from home with no experience required.
 Sign up today and start making $3000 per week.
 Limited time offer.
+
 3
 Subject: Urgent Account Verification
 
 Your account has been compromised.
 Please verify your account information immediately to avoid suspension.
 Click here to verify your details.
+
 4
 Subject: Claim Your Reward
 
 You have won a $5000 reward.
 Complete the form and claim your reward now.
 Don't miss this opportunity.
+
 5
 Subject: Cheap Medication Online
 
@@ -250,7 +254,9 @@ Expected result for most of these:
 
 SPAM
 Likely to be spam: 80–99%
+
 ✅ Legitimate Email Examples (should return NOT SPAM)
+
 6
 Subject: Project Meeting Tomorrow
 
@@ -260,6 +266,7 @@ Just a reminder that we have a project meeting scheduled tomorrow at 10 AM.
 Please review the documents shared earlier.
 
 Best regards.
+
 7
 Subject: Assignment Submission Reminder
 
@@ -267,6 +274,7 @@ Hello everyone,
 
 This is a reminder that the machine learning assignment is due on Friday.
 Please upload your final report before the deadline.
+
 8
 Subject: Lunch Tomorrow
 
@@ -274,6 +282,7 @@ Hi Rahul,
 
 Are you free for lunch tomorrow around 1 PM?
 Let me know if you would like to meet at the usual place.
+
 9
 Subject: Software Update
 
@@ -281,6 +290,7 @@ Dear user,
 
 A new software update is available for your application.
 Please install the latest version to improve performance and security.
+
 10
 Subject: Weekend Trip Plan
 
