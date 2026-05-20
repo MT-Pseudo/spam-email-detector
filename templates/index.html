@@ -1,130 +1,551 @@
 <!doctype html>
-<html>
-  <head>
-    <title>Email Spam Detector</title>
+<html lang="en">
+<head>
+  <title>Spam Detector</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    <style>
-      body {
-        margin: 0;
-        font-family: Arial, Helvetica, sans-serif;
-        background-image: url("https://images.unsplash.com/photo-1557682250-33bd709cbe85");
-        background-size: cover;
-        background-position: center;
-        height: 100vh;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        color: white;
-      }
+    :root {
+      --bg: #0d0d10;
+      --sidebar-bg: #111116;
+      --panel-bg: #16161c;
+      --border: #2a2a35;
+      --accent: #7c6fef;
+      --accent-hover: #9488f5;
+      --text: #e8e8f0;
+      --muted: #6b6b80;
+      --spam-red: #ff5e5e;
+      --ok-green: #4eca7f;
+      --tag-bg: #1e1e28;
+      --input-bg: #1a1a22;
+      --radius: 10px;
+    }
 
-      .container {
-        text-align: center;
-        width: 650px;
-      }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
 
-      h1 {
-        font-size: 60px;
-        margin-bottom: 10px;
-      }
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width: 240px;
+      min-width: 240px;
+      background: var(--sidebar-bg);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      padding: 28px 20px 24px;
+      gap: 0;
+    }
 
-      p {
-        font-size: 18px;
-        color: #f0f0f0;
-        margin-bottom: 40px;
-      }
+    .logo-icon {
+      width: 36px; height: 36px;
+      background: var(--accent);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 14px;
+    }
+    .logo-icon svg { width: 18px; height: 18px; fill: #fff; }
 
-      textarea {
-        width: 100%;
-        height: 80px;
-        border-radius: 40px;
-        border: none;
-        padding: 20px;
-        font-size: 16px;
-        outline: none;
-        resize: none;
-      }
+    .sidebar h1 {
+      font-family: 'Space Mono', monospace;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 6px;
+      letter-spacing: -0.3px;
+    }
 
-      button {
-        margin-top: 20px;
-        background: #f2b544;
-        border: none;
-        padding: 15px 40px;
-        font-size: 18px;
-        border-radius: 40px;
-        cursor: pointer;
-        font-weight: bold;
-      }
+    .sidebar .tagline {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.5;
+      margin-bottom: 28px;
+    }
 
-      button:hover {
-        background: #e5a431;
-      }
+    .sidebar-divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 0 0 20px;
+    }
 
-      .result {
-        margin-top: 25px;
-        font-size: 30px;
-        font-weight: bold;
-      }
+    .sidebar-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: var(--muted);
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
 
-      .spam {
-        color: #ff4c4c;
-      }
+    .api-key-input {
+      width: 100%;
+      background: var(--input-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-family: 'Space Mono', monospace;
+      font-size: 12px;
+      padding: 9px 12px;
+      outline: none;
+      margin-bottom: 6px;
+      transition: border-color 0.2s;
+    }
+    .api-key-input:focus { border-color: var(--accent); }
+    .api-key-input::placeholder { color: var(--muted); }
 
-      .ham {
-        color: #5cff6f;
-      }
+    .api-hint {
+      font-size: 11px;
+      color: var(--muted);
+      margin-bottom: 28px;
+    }
+    .api-hint a { color: var(--accent); text-decoration: none; }
+    .api-hint a:hover { text-decoration: underline; }
 
-      .probability {
-        margin-top: 10px;
-        font-size: 18px;
-      }
-    </style>
-  </head>
+    /* Stats */
+    .stats-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 28px; }
 
-  <body>
-    <div class="container">
-      <h1>Spam Detection</h1>
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--input-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 9px 14px;
+      font-size: 13px;
+      color: var(--text);
+    }
 
-      <p>
-        This web application uses a machine learning model to analyze email text
-        and determine whether the message is spam or legitimate. Paste the email
-        content below and click Detect Spam.
-      </p>
+    .stat-badge {
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      background: var(--tag-bg);
+      border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      font-family: 'Space Mono', monospace;
+    }
+    .stat-badge.red { background: rgba(255,94,94,0.12); border-color: rgba(255,94,94,0.4); color: var(--spam-red); }
+    .stat-badge.green { background: rgba(78,202,127,0.12); border-color: rgba(78,202,127,0.4); color: var(--ok-green); }
 
-      <form method="POST" onsubmit="return validateForm();">
-        <textarea
-          id="emailText"
-          name="email"
-          placeholder="Paste email text here..."
-          required
-        ></textarea>
+    /* Recent scans */
+    .scans-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .scans-header .sidebar-label { margin-bottom: 0; }
+    .clear-btn {
+      font-size: 11px;
+      color: var(--accent);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .clear-btn:hover { color: var(--accent-hover); }
 
-        <br />
+    .no-scans {
+      font-size: 12px;
+      color: var(--muted);
+      text-align: center;
+      margin-top: 12px;
+    }
 
-        <button type="submit">DETECT SPAM</button>
-      </form>
+    .scan-item {
+      background: var(--input-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 8px 12px;
+      margin-bottom: 6px;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+    .scan-item:hover { border-color: var(--accent); }
+    .scan-item .scan-subj {
+      font-size: 12px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 3px;
+    }
+    .scan-item .scan-meta {
+      font-size: 10px;
+      color: var(--muted);
+      display: flex;
+      gap: 8px;
+    }
+    .scan-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      display: inline-block;
+      margin-top: 2px;
+    }
+    .scan-dot.spam { background: var(--spam-red); }
+    .scan-dot.ok { background: var(--ok-green); }
 
-      {% if result %}
+    /* ── MAIN ── */
+    .main {
+      flex: 1;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 40px 48px;
+      overflow-y: auto;
+    }
 
-      <div class="result {% if result == 'SPAM' %}spam{% else %}ham{% endif %}">
-        {{result}}
-      </div>
+    .card {
+      background: var(--panel-bg);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 32px 36px;
+      width: 100%;
+      max-width: 860px;
+    }
 
-      <div class="probability">Likely to be spam: {{probability}}</div>
+    .field-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: var(--muted);
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
 
-      {% endif %}
+    .text-input {
+      width: 100%;
+      background: var(--input-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      padding: 12px 16px;
+      outline: none;
+      transition: border-color 0.2s;
+      margin-bottom: 20px;
+    }
+    .text-input:focus { border-color: var(--accent); }
+    .text-input::placeholder { color: var(--muted); }
+
+    textarea.text-input {
+      resize: vertical;
+      min-height: 130px;
+      line-height: 1.6;
+    }
+
+    /* Sample chips */
+    .chips-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+    .chips-label {
+      font-size: 12px;
+      color: var(--muted);
+      margin-right: 2px;
+    }
+    .chip {
+      background: var(--tag-bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 5px 12px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      display: flex; align-items: center; gap: 5px;
+      color: var(--text);
+    }
+    .chip:hover { border-color: var(--accent); background: rgba(124,111,239,0.08); }
+
+    /* Analyze button */
+    .analyze-btn {
+      width: 100%;
+      background: var(--accent);
+      border: none;
+      border-radius: var(--radius);
+      color: #fff;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      padding: 14px;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      letter-spacing: 0.2px;
+    }
+    .analyze-btn:hover { background: var(--accent-hover); }
+    .analyze-btn:active { transform: scale(0.99); }
+    .analyze-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* Result panel */
+    .result-panel {
+      margin-top: 24px;
+      background: var(--input-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      display: none;
+    }
+    .result-panel.visible { display: block; }
+
+    .result-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+    .verdict {
+      font-family: 'Space Mono', monospace;
+      font-size: 20px;
+      font-weight: 700;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .verdict.spam { color: var(--spam-red); }
+    .verdict.ok { color: var(--ok-green); }
+
+    .confidence-pill {
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 12px;
+      border-radius: 20px;
+    }
+    .confidence-pill.spam { background: rgba(255,94,94,0.12); color: var(--spam-red); border: 1px solid rgba(255,94,94,0.3); }
+    .confidence-pill.ok { background: rgba(78,202,127,0.12); color: var(--ok-green); border: 1px solid rgba(78,202,127,0.3); }
+
+    .result-body {
+      font-size: 13px;
+      color: #b0b0c0;
+      line-height: 1.7;
+    }
+
+    .keyword-flags {
+      display: flex; flex-wrap: wrap; gap: 6px;
+      margin-top: 12px;
+    }
+    .kw-tag {
+      font-size: 11px;
+      background: rgba(255,94,94,0.08);
+      border: 1px solid rgba(255,94,94,0.25);
+      color: var(--spam-red);
+      border-radius: 4px;
+      padding: 3px 8px;
+      font-family: 'Space Mono', monospace;
+    }
+
+    /* Loading spinner */
+    .spinner {
+      display: inline-block;
+      width: 16px; height: 16px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="logo-icon">
+    <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4V8l8 5 8-5v10zm-8-7L4 6h16l-8 5z"/></svg>
+  </div>
+  <h1>Spam Detector</h1>
+  <p class="tagline">AI-powered email analysis with confidence scoring, keyword flagging &amp; scan history.</p>
+
+  <hr class="sidebar-divider" />
+
+  <div class="sidebar-label">Anthropic API Key</div>
+  <input id="apiKey" class="api-key-input" type="password" placeholder="sk-ant-..." />
+  <p class="api-hint">Used directly with Anthropic. Get one at <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a></p>
+
+  <div class="sidebar-label">Stats</div>
+  <div class="stats-group">
+    <div class="stat-row">Total scanned <span class="stat-badge" id="statTotal">0</span></div>
+    <div class="stat-row">Spam detected <span class="stat-badge red" id="statSpam">0</span></div>
+    <div class="stat-row">Legitimate <span class="stat-badge green" id="statLegit">0</span></div>
+  </div>
+
+  <div class="scans-header">
+    <div class="sidebar-label">Recent Scans</div>
+    <button class="clear-btn" onclick="clearScans()">Clear all</button>
+  </div>
+  <div id="scanList"><p class="no-scans">No scans yet.</p></div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <div class="card">
+
+    <div class="field-label">Subject Line (Optional)</div>
+    <input id="subject" class="text-input" type="text" placeholder="e.g. You've won $5,000!" />
+
+    <div class="field-label">Email Body</div>
+    <textarea id="body" class="text-input" placeholder="Paste the email body here…"></textarea>
+
+    <div class="chips-row">
+      <span class="chips-label">Try:</span>
+      <button class="chip" onclick="loadSample('prize')">🎉 Prize scam</button>
+      <button class="chip" onclick="loadSample('pharma')">💊 Pharma spam</button>
+      <button class="chip" onclick="loadSample('meeting')">📅 Meeting invite</button>
+      <button class="chip" onclick="loadSample('uni')">📄 Uni reminder</button>
     </div>
 
-    <script>
-      function validateForm() {
-        let text = document.getElementById("emailText").value.trim();
+    <button class="analyze-btn" id="analyzeBtn" onclick="analyze()">Analyze Email</button>
 
-        if (text === "") {
-          alert("Please paste the email text before detecting spam.");
-          return false;
-        }
+    <div class="result-panel" id="resultPanel">
+      <div class="result-header">
+        <div class="verdict" id="verdictText"></div>
+        <span class="confidence-pill" id="confPill"></span>
+      </div>
+      <div class="result-body" id="resultBody"></div>
+      <div class="keyword-flags" id="kwFlags"></div>
+    </div>
 
-        return true;
-      }
-    </script>
-  </body>
+  </div>
+</main>
+
+<script>
+  const SAMPLES = {
+    prize: {
+      subject: "🎉 You've won $5,000!",
+      body: "Congratulations! You have been selected as our lucky winner. Click here to claim your $5,000 prize. Limited time offer — act now! Send us your bank details to receive your cash reward immediately. Don't miss this exclusive opportunity."
+    },
+    pharma: {
+      subject: "Cheap meds — no prescription needed",
+      body: "Buy Viagra, Cialis and more at 90% off! No prescription required. Discreet shipping worldwide. Click the link below to order now. Limited stock available — hurry!"
+    },
+    meeting: {
+      subject: "Team sync — Thursday 3pm",
+      body: "Hi everyone, just a reminder that we have our weekly team sync on Thursday at 3pm in the main conference room. Please review the agenda doc before joining. Let me know if you can't make it. Thanks!"
+    },
+    uni: {
+      subject: "Exam schedule reminder",
+      body: "Dear student, this is a reminder that your final examinations begin on Monday 24th. Please check the portal for your personalised timetable and make sure to bring your student ID to each session."
+    }
+  };
+
+  function loadSample(key) {
+    document.getElementById('subject').value = SAMPLES[key].subject;
+    document.getElementById('body').value = SAMPLES[key].body;
+    document.getElementById('resultPanel').classList.remove('visible');
+  }
+
+  // ── Stats & History ──
+  let stats = { total: 0, spam: 0, legit: 0 };
+  let history = [];
+
+  function updateStats() {
+    document.getElementById('statTotal').textContent = stats.total;
+    document.getElementById('statSpam').textContent = stats.spam;
+    document.getElementById('statLegit').textContent = stats.legit;
+  }
+
+  function addScanItem(subject, isSpam, confidence) {
+    history.unshift({ subject, isSpam, confidence });
+    if (history.length > 20) history.pop();
+    renderScans();
+  }
+
+  function renderScans() {
+    const el = document.getElementById('scanList');
+    if (!history.length) { el.innerHTML = '<p class="no-scans">No scans yet.</p>'; return; }
+    el.innerHTML = history.slice(0, 8).map(h => `
+      <div class="scan-item">
+        <div class="scan-subj">${h.subject || '(no subject)'}</div>
+        <div class="scan-meta">
+          <span class="scan-dot ${h.isSpam ? 'spam' : 'ok'}"></span>
+          <span>${h.isSpam ? 'Spam' : 'Legitimate'}</span>
+          <span>${h.confidence}% confidence</span>
+        </div>
+      </div>`).join('');
+  }
+
+  function clearScans() { history = []; stats = { total: 0, spam: 0, legit: 0 }; updateStats(); renderScans(); }
+
+  // ── Analyze ──
+  async function analyze() {
+    const apiKey = document.getElementById('apiKey').value.trim();
+    const subject = document.getElementById('subject').value.trim();
+    const body = document.getElementById('body').value.trim();
+
+    if (!body) { alert('Please enter an email body.'); return; }
+    if (!apiKey) { alert('Please enter your Anthropic API key in the sidebar.'); return; }
+
+    const btn = document.getElementById('analyzeBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>Analyzing…';
+    document.getElementById('resultPanel').classList.remove('visible');
+
+    const prompt = `You are an email spam classifier. Analyze the following email and respond ONLY with a JSON object (no markdown, no explanation) with these exact keys:
+- "verdict": "SPAM" or "LEGITIMATE"
+- "confidence": integer 0-100
+- "reason": one sentence explanation
+- "keywords": array of up to 5 flagged spam phrases (empty array if legitimate)
+
+Subject: ${subject || '(none)'}
+Body: ${body}`;
+
+    try {
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 300,
+          messages: [{ role: 'user', content: prompt }]
+        })
+      });
+
+      const data = await res.json();
+      if (data.error) throw new Error(data.error.message);
+
+      const raw = data.content.map(b => b.text || '').join('').trim();
+      const clean = raw.replace(/```json|```/g, '').trim();
+      const result = JSON.parse(clean);
+
+      const isSpam = result.verdict === 'SPAM';
+      const cls = isSpam ? 'spam' : 'ok';
+      const icon = isSpam ? '🚨' : '✅';
+
+      document.getElementById('verdictText').className = `verdict ${cls}`;
+      document.getElementById('verdictText').innerHTML = `${icon} ${result.verdict}`;
+      document.getElementById('confPill').className = `confidence-pill ${cls}`;
+      document.getElementById('confPill').textContent = `${result.confidence}% confidence`;
+      document.getElementById('resultBody').textContent = result.reason;
+
+      const kwEl = document.getElementById('kwFlags');
+      kwEl.innerHTML = (result.keywords || []).map(k => `<span class="kw-tag">${k}</span>`).join('');
+
+      document.getElementById('resultPanel').classList.add('visible');
+
+      stats.total++;
+      if (isSpam) stats.spam++; else stats.legit++;
+      updateStats();
+      addScanItem(subject || body.slice(0, 40), isSpam, result.confidence);
+    } catch (e) {
+      alert('Error: ' + e.message);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Analyze Email';
+    }
+  }
+</script>
+</body>
 </html>
